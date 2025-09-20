@@ -1,0 +1,27 @@
+-----------------------------------------------
+Pseudocódigo de Dijkstra (base do algoritmo A*)
+-> Modificado para a busca de um objetivo
+-----------------------------------------------
+
+Dijkstra(G, s, t):
+    para cada vértice v em G:
+        dist[v] ← ∞
+        pai[v]  ← indefinido
+    dist[s] ← 0
+
+    Q ← todos os vértices em uma fila de prioridade (min-heap)
+
+    enquanto Q não está vazio:
+        u ← extrair_min(Q)
+
+        se u == t:
+            parar  // já encontramos o destino com custo mínimo
+
+        para cada vizinho v de u:
+            se dist[v] > dist[u] + peso(u, v):
+                dist[v] ← dist[u] + peso(u, v)
+                pai[v]  ← u
+                atualizar v em Q
+
+    retornar dist[t], caminho reconstruído a partir de pai[]
+
