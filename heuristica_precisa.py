@@ -1,34 +1,52 @@
 import heapq
+from colorama import init, Fore
 import time
-from colorama import init, Fore, Back, Style
 
 
-class CustoUniforme:
+class AEstrela:
     def __init__(self, objetivo: tuple):
         self.objetivo = objetivo
 
+    # Impressões
     def imprimir_estado(self, estado):
-        tuple = [estado[i : i + 3] for i in range(0, 9, 3)]
-        for row in tuple:
+        rows = [estado[i : i + 3] for i in range(0, 9, 3)]
+        for row in rows:
             print(" ".join(str(x) if x != 0 else "_" for x in row))
         print()
 
     def imprimir_resultados(self, stats):
-        print(Fore.BLUE + f"Custo: {stats['Custo']}")
+        print(Fore.BLUE + f"\nCusto (g): {stats['Custo']}, f=g+h: {stats['f']}")
         print("Caminho:")
         for estado in stats["Caminho"]:
             self.imprimir_estado(estado)
         print(f"Iterações: {stats['Iterações']}")
         print(f"Tempo: {stats['Tempo']}")
 
-    # Essa função aqui é toda quase toda Chat, só simplificada
+    # Heurística
+    def heuristica_pecas_fora_do_lugar(self, estado):
+        # Conta quantas peças não estão na posição correta (ignorando o 0)
+        return sum(
+            1 for i in range(9) if estado[i] != 0 and estado[i] != self.objetivo[i]
+        )
+
+    def heuristica_distancia_manhathan(self, estado):
+        resultado = 0
+        for num in estado:
+            # Calcula a distância Manhathan de cada numero pra sua posição no estado objetivo e soma em resultado
+            index_atual = estado.index(num)
+            linha_atual, col_atual = divmod(index_atual, 3)
+            index_obj = self.objetivo.index(num)
+            linha_obj, col_obj = divmod(index_obj, 3)
+            resultado += abs(linha_atual - linha_obj) + abs(col_atual - col_obj)
+        return resultado
+
+    # Vizinhos
     def definir_vizinhos(self, estado):
         estado = tuple(estado)
         vizinhos = []
-        index_zero = estado.index(0)  # Posição do espaço vazio
-        linha, col = divmod(index_zero, 3)  # Muda
+        index_zero = estado.index(0)
+        linha, col = divmod(index_zero, 3)
 
-        # Troca o 0 com as posições possiveis (cima, baixo, lados...)
         movimentos = []
         if linha > 0:
             movimentos.append(index_zero - 3)
@@ -41,7 +59,6 @@ class CustoUniforme:
 
         for index_mov in movimentos:
             novo_estado = list(estado)
-            # Trocas de indexes
             novo_estado[index_zero], novo_estado[index_mov] = (
                 novo_estado[index_mov],
                 novo_estado[index_zero],
@@ -50,6 +67,7 @@ class CustoUniforme:
 
         return vizinhos
 
+    # Reconstrução do caminho
     def reconstruir_caminho(self, pais):
         caminho = []
         estado_atual = self.objetivo
@@ -59,73 +77,84 @@ class CustoUniforme:
         caminho.reverse()
         return caminho
 
-    def custo_uniforme(self, inicio, max_iteracoes: int):
-        tempo_inicio = time.time()
+    # Algoritmo A*
+    def a_estrela(self, inicio, max_iteracoes: int):
+        tempo_inicio = time.time()  # Contagem de segundos
         estados_abertos = []
-        estados_fechados = []
+        estados_fechados = set()
         pais = {inicio: None}
         distancias = {inicio: 0}
-        # Heap para facilitar a fila de prioridade
-        # Heapheapq.heappop(estados_abertos) vai trazer o estado com menos custo
-        heapq.heappush(estados_abertos, (0, inicio))
+
+        # Calcula a heurística do estado inicial
+        h0 = self.heuristica_distancia_manhathan(inicio)
+        f0 = 0 + h0  # g (num movimentos) + heuristica
+        heapq.heappush(estados_abertos, (f0, 0, h0, inicio))
         cont_iteracoes = 0
 
-        while len(estados_abertos) > 0 and cont_iteracoes < max_iteracoes:
-
-            # Retira o primeiro estado na lista de prioridade do Heap e a dist
-            dist, estado_atual = heapq.heappop(estados_abertos)
-            print(Fore.YELLOW + f"\n[POP] Estado atual; Dist: {dist}")
+        while estados_abertos and cont_iteracoes < max_iteracoes:
+            # Retira o estado com menor f do heap (prioridade)
+            f, g, h, estado_atual = heapq.heappop(estados_abertos)
+            print(Fore.YELLOW + f"\n[POP] Estado atual; f: {f}, g: {g}, h: {h}")
             self.imprimir_estado(estado_atual)
 
-            # Se for o estado objetivo, para o algo e retorna o caminho, distancia e num de iterações
+            # Se o estado atual for o objetivo, finaliza
             if estado_atual == self.objetivo:
                 tempo_fim = time.time()
                 print(Fore.GREEN + "[FIM] Objetivo alcançado")
                 caminho = self.reconstruir_caminho(pais)
                 stats = {
-                    "Custo": dist,
+                    "Custo": g,
+                    "Heuristica": h,
+                    "f": f,
                     "Caminho": caminho,
                     "Iterações": cont_iteracoes,
                     "Tempo": tempo_fim - tempo_inicio,
                 }
                 return stats
 
-            # Ignora o estado se ele já esta na lista dos fechados
+            # Se o estado já foi explorado, ignora
             if estado_atual in estados_fechados:
                 continue
 
-            # Pegar os vizinhos
+            # Gera todos os vizinhos possíveis do estado atual
             vizinhos = self.definir_vizinhos(estado_atual)
 
+            # Ignora vizinhos já explorados
             for vizinho in vizinhos:
-                # Pular se o vizinho já estiver fechado
                 if vizinho in estados_fechados:
                     continue
 
-                # Distância do estado anterior até o vizinho novo
-                dist_nova = dist + 1
+                # g_novo = custo real do estado inicial até o vizinho
+                g_novo = g + 1
 
-                # Pegar a distância do vizinho se tiver, se não definir como infinita
-                if vizinho in distancias.keys():
-                    dist_vizinho = distancias[vizinho]
-                else:
-                    dist_vizinho = float("inf")  # Isso seria o infinito
+                # Pega o custo conhecido do vizinho (se houver). Se não, assume infinito
+                dist_vizinho = distancias.get(vizinho, float("inf"))
 
-                # Se a distância for menor, atualiza distancias e os pais
-                if dist_nova < dist_vizinho:
-                    distancias[vizinho] = dist_nova
+                # Só atualiza se encontramos um caminho melhor (menor g)
+                if g_novo < dist_vizinho:
+                    distancias[vizinho] = g_novo
                     pais[vizinho] = estado_atual
-                    heapq.heappush(estados_abertos, (dist_nova, vizinho))
+                    # Calcula heurística do vizinho
+                    h_novo = self.heuristica_distancia_manhathan(vizinho)
+                    # Calcula f = g + h
+                    f_novo = g_novo + h_novo
+                    # Adiciona o vizinho ao heap de abertos
+                    heapq.heappush(estados_abertos, (f_novo, g_novo, h_novo, vizinho))
                     print(
                         Fore.BLUE
-                        + f"[PUSH] Vizinho {vizinho} adicionado aos estados abertos"
+                        + f"[PUSH] Vizinho {vizinho} com f={f_novo}, g={g_novo}, h={h_novo} adicionado"
                     )
 
-            # Fecha o estado atual, atualiza as iterações
-            estados_fechados.append(estado_atual)
+            # Mostrar abertos e fechados
+            # print(
+            #     Fore.MAGENTA
+            #     + f"[ABERTOS] {[(f, g, h, s) for f, g, h, s in estados_abertos]}"
+            # )
+            # print(Fore.CYAN + f"[FECHADOS] {list(estados_fechados)}")
+
+            estados_fechados.add(estado_atual)
             cont_iteracoes += 1
 
-        # Se passar do número máximo de iterações, retorna 0
         print(Fore.RED + f"[ERRO] Sem solução no limite de {max_iteracoes} iterações")
         return 0
 
@@ -140,10 +169,10 @@ def main():
         (7, 2, 4, 5, 0, 6, 8, 3, 1),  # difícil 2
     ]
     objetivo = (1, 2, 3, 4, 5, 6, 7, 8, 0)
-    custo_uniforme = CustoUniforme(objetivo)
+    aestrela = AEstrela(objetivo)
     stats = []
     for inicio in inicios:
-        stats.append(custo_uniforme.custo_uniforme(inicio, 100000))
+        stats.append(aestrela.a_estrela(inicio, 1000000))
 
     # Descomentar para impressão do caminho
     # for stat in stats:
