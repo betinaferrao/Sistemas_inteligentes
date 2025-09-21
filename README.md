@@ -18,9 +18,7 @@ Para exemplos diferentes, **modificar as tuplas na função main** e/ou a quanti
 
 O algoritmo A* combina a busca em custo uniforme com uma heurística que estima o custo restante até o objetivo. Neste trabalho, utilizamos uma heurística simples admissível para o problema do 8-puzzle, baseada em peças fora do lugar.
 
-#### 3.1 Definição da heurística
-
-Nome: Peças fora do lugar (misplaced tiles)
+Nome: Peças fora do lugar
 
 Descrição: Conta o número de peças que não estão na posição correta, ignorando o espaço vazio (0). Cada peça fora do lugar contribui com um custo mínimo de 1 movimento.
 
