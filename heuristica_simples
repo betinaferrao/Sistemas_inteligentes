@@ -23,7 +23,7 @@ class AEstrela:
 
     # Heurística
     def heuristica_pecas_fora_do_lugar(self, estado):
-        """Conta quantas peças não estão na posição correta (ignorando o 0)."""
+        # Conta quantas peças não estão na posição correta (ignorando o 0)
         return sum(
             1 for i in range(9) if estado[i] != 0 and estado[i] != self.objetivo[i]
         )
