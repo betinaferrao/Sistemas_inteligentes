@@ -129,29 +129,38 @@ class CustoUniforme:
         print(Fore.RED + f"[ERRO] Sem solução no limite de {max_iteracoes} iterações")
         return 0
 
-
 def main():
     init(autoreset=True)
     inicios = [
         (1, 2, 3, 4, 0, 6, 7, 5, 8),  # fácil
         (1, 2, 3, 5, 0, 6, 4, 7, 8),  # médio 1
-        (1, 6, 2, 5, 0, 3, 4, 7, 8),  # médio 2
-        (5, 1, 3, 4, 0, 2, 7, 6, 8),  # difícil 1
+        (3, 0, 6, 4, 2, 1, 7, 5, 8),  # médio 2
+        (0, 4, 7, 2, 3, 1, 6, 8, 5),  # difícil 1
         (7, 2, 4, 5, 0, 6, 8, 3, 1),  # difícil 2
     ]
     objetivo = (1, 2, 3, 4, 5, 6, 7, 8, 0)
     custo_uniforme = CustoUniforme(objetivo)
     stats = []
-    for inicio in inicios:
-        stats.append(custo_uniforme.custo_uniforme(inicio, 100000))
 
-    # Descomentar para impressão do caminho
-    # for stat in stats:
-    #     if stat:
-    #         aestrela.imprimir_resultados(stat)
+    for i, inicio in enumerate(inicios):
+        print(Fore.MAGENTA + "\n" + "=" * 40)
+        print(Fore.MAGENTA + f"=========== TESTE {i} ===========")
+        print(Fore.MAGENTA + "=" * 40 + "\n")
+        print("Estado inicial:")
+        custo_uniforme.imprimir_estado(inicio)
 
-    i = 0
-    for stat in stats:
+        resultado = custo_uniforme.custo_uniforme(inicio, 100000)
+        stats.append(resultado)
+
+        print(Fore.MAGENTA + "=" * 40)
+        print(Fore.MAGENTA + f"========= FIM TESTE {i} =========")
+        print(Fore.MAGENTA + "=" * 40 + "\n")
+
+    print(Fore.CYAN + "\n" + "=" * 40)
+    print(Fore.CYAN + "=========== RESUMO FINAL ===========")
+    print(Fore.CYAN + "=" * 40 + "\n")
+
+    for i, stat in enumerate(stats):
         print("Resumo de desempenho -----------\n")
         if stat:
             print(
@@ -163,7 +172,6 @@ def main():
             )
         else:
             print(f"Início {i} não resolvido dentro do limite\n")
-        i += 1
 
 
 if __name__ == "__main__":
