@@ -22,13 +22,6 @@ class AEstrela:
         print(f"Iterações: {stats['Iterações']}")
         print(f"Tempo: {stats['Tempo']}")
 
-    # Heurística
-    def heuristica_pecas_fora_do_lugar(self, estado):
-        # Conta quantas peças não estão na posição correta (ignorando o 0)
-        return sum(
-            1 for i in range(9) if estado[i] != 0 and estado[i] != self.objetivo[i]
-        )
-
     def heuristica_distancia_manhathan(self, estado):
         resultado = 0
         for num in estado:
@@ -164,23 +157,33 @@ def main():
     inicios = [
         (1, 2, 3, 4, 0, 6, 7, 5, 8),  # fácil
         (1, 2, 3, 5, 0, 6, 4, 7, 8),  # médio 1
-        (1, 6, 2, 5, 0, 3, 4, 7, 8),  # médio 2
-        (5, 1, 3, 4, 0, 2, 7, 6, 8),  # difícil 1
+        (3, 0, 6, 4, 2, 1, 7, 5, 8),  # médio 2
+        (0, 4, 7, 2, 3, 1, 6, 8, 5),  # difícil 1
         (7, 2, 4, 5, 0, 6, 8, 3, 1),  # difícil 2
     ]
     objetivo = (1, 2, 3, 4, 5, 6, 7, 8, 0)
     aestrela = AEstrela(objetivo)
     stats = []
-    for inicio in inicios:
-        stats.append(aestrela.a_estrela(inicio, 1000000))
 
-    # Descomentar para impressão do caminho
-    # for stat in stats:
-    #     if stat:
-    #         aestrela.imprimir_resultados(stat)
+    for i, inicio in enumerate(inicios):
+        print(Fore.MAGENTA + "\n" + "=" * 40)
+        print(Fore.MAGENTA + f"=========== TESTE {i} ===========")
+        print(Fore.MAGENTA + "=" * 40 + "\n")
+        print("Estado inicial:")
+        aestrela.imprimir_estado(inicio)
 
-    i = 0
-    for stat in stats:
+        resultado = aestrela.a_estrela(inicio, 1000000)
+        stats.append(resultado)
+
+        print(Fore.MAGENTA + "=" * 40)
+        print(Fore.MAGENTA + f"========= FIM TESTE {i} =========")
+        print(Fore.MAGENTA + "=" * 40 + "\n")
+
+    print(Fore.CYAN + "\n" + "=" * 40)
+    print(Fore.CYAN + "=========== RESUMO FINAL ===========")
+    print(Fore.CYAN + "=" * 40 + "\n")
+
+    for i, stat in enumerate(stats):
         print("Resumo de desempenho -----------\n")
         if stat:
             print(
@@ -192,8 +195,6 @@ def main():
             )
         else:
             print(f"Início {i} não resolvido dentro do limite\n")
-        i += 1
-
 
 if __name__ == "__main__":
     main()
