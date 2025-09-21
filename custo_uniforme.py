@@ -21,7 +21,6 @@ class CustoUniforme:
         print(f"Iterações: {stats['Iterações']}")
         print(f"Tempo: {stats['Tempo']}")
 
-    # Essa função aqui é toda quase toda Chat, só simplificada
     def definir_vizinhos(self, estado):
         estado = tuple(estado)
         vizinhos = []
