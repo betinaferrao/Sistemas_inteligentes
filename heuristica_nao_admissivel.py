@@ -13,24 +13,24 @@ class AEstrela:
             print(" ".join(str(x) if x != 0 else "_" for x in row))
         print()
 
-    def imprimir_resultados(self, stats):
-        print(f"\nCusto (g): {stats['Custo']}, f=g+h: {stats['f']}")
-        print("Caminho:")
-        for estado in stats["Caminho"]:
-            self.imprimir_estado(estado)
+    def imprimir_resultados(self, stats): 
+        print(f"Total de nodos visitados: {stats['NodosVisitados']}") 
+        print(f"Tamanho do caminho: {stats['Custo']}")
         print(f"Iterações: {stats['Iterações']}")
         print(f"Tempo: {stats['Tempo']}")
 
     def heuristica_superestimada(self, estado):
         resultado = 0
         for num in estado:
+            if num == 0: 
+                continue
             # Calcula a distância Manhathan de cada numero pra sua posição no estado objetivo e soma em resultado
             index_atual = estado.index(num)
             linha_atual, col_atual = divmod(index_atual, 3)
             index_obj = self.objetivo.index(num)
             linha_obj, col_obj = divmod(index_obj, 3)
-            resultado += (abs(linha_atual - linha_obj) + abs(col_atual - col_obj))*2 # Penaliza as distâncias maiores
-        return resultado
+            resultado += abs(linha_atual - linha_obj) + abs(col_atual - col_obj)
+        return resultado*4 # Penaliza as distâncias maiores
 
     # Vizinhos
     def definir_vizinhos(self, estado):
@@ -71,21 +71,22 @@ class AEstrela:
 
     # Algoritmo A*
     def a_estrela(self, inicio, max_iteracoes: int):
-        tempo_inicio = time.time()  # Contagem de segundos
+        tempo_inicio = time.time()
         estados_abertos = []
         estados_fechados = set()
         pais = {inicio: None}
         distancias = {inicio: 0}
 
-        # Calcula a heurística do estado inicial
         h0 = self.heuristica_superestimada(inicio)
-        f0 = 0 + h0  # g (num movimentos) + heuristica
+        f0 = 0 + h0
         heapq.heappush(estados_abertos, (f0, 0, h0, inicio))
         cont_iteracoes = 0
+        nodos_visitados = 0  
 
         while estados_abertos and cont_iteracoes < max_iteracoes:
             # Retira o estado com menor f do heap (prioridade)
             f, g, h, estado_atual = heapq.heappop(estados_abertos)
+            nodos_visitados += 1 
             print(f"\n[POP] Estado atual; f: {f}, g: {g}, h: {h}")
             self.imprimir_estado(estado_atual)
 
@@ -96,11 +97,9 @@ class AEstrela:
                 caminho = self.reconstruir_caminho(pais)
                 stats = {
                     "Custo": g,
-                    "Heuristica": h,
-                    "f": f,
-                    "Caminho": caminho,
                     "Iterações": cont_iteracoes,
                     "Tempo": tempo_fim - tempo_inicio,
+                    "NodosVisitados": nodos_visitados,  
                 }
                 return stats
 
@@ -190,8 +189,10 @@ def main():
                 stat["Iterações"],
                 "\n",
             )
+            aestrela.imprimir_resultados(stat)
         else:
             print(f"Início {i} não resolvido dentro do limite\n")
+
 
 if __name__ == "__main__":
     main()
