@@ -1,5 +1,4 @@
 import heapq
-from colorama import init, Fore
 import time
 
 
@@ -15,7 +14,7 @@ class AEstrela:
         print()
 
     def imprimir_resultados(self, stats):
-        print(Fore.BLUE + f"\nCusto (g): {stats['Custo']}, f=g+h: {stats['f']}")
+        print(f"\nCusto (g): {stats['Custo']}, f=g+h: {stats['f']}")
         print("Caminho:")
         for estado in stats["Caminho"]:
             self.imprimir_estado(estado)
@@ -87,13 +86,13 @@ class AEstrela:
         while estados_abertos and cont_iteracoes < max_iteracoes:
             # Retira o estado com menor f do heap (prioridade)
             f, g, h, estado_atual = heapq.heappop(estados_abertos)
-            print(Fore.YELLOW + f"\n[POP] Estado atual; f: {f}, g: {g}, h: {h}")
+            print(f"\n[POP] Estado atual; f: {f}, g: {g}, h: {h}")
             self.imprimir_estado(estado_atual)
 
             # Se o estado atual for o objetivo, finaliza
             if estado_atual == self.objetivo:
                 tempo_fim = time.time()
-                print(Fore.GREEN + "[FIM] Objetivo alcançado")
+                print("[FIM] Objetivo alcançado")
                 caminho = self.reconstruir_caminho(pais)
                 stats = {
                     "Custo": g,
@@ -134,8 +133,7 @@ class AEstrela:
                     # Adiciona o vizinho ao heap de abertos
                     heapq.heappush(estados_abertos, (f_novo, g_novo, h_novo, vizinho))
                     print(
-                        Fore.BLUE
-                        + f"[PUSH] Vizinho {vizinho} com f={f_novo}, g={g_novo}, h={h_novo} adicionado"
+                        f"[PUSH] Vizinho {vizinho} com f={f_novo}, g={g_novo}, h={h_novo} adicionado"
                     )
 
             # Mostrar abertos e fechados
@@ -148,12 +146,11 @@ class AEstrela:
             estados_fechados.add(estado_atual)
             cont_iteracoes += 1
 
-        print(Fore.RED + f"[ERRO] Sem solução no limite de {max_iteracoes} iterações")
+        print(f"[ERRO] Sem solução no limite de {max_iteracoes} iterações")
         return 0
 
 
 def main():
-    init(autoreset=True)
     inicios = [
         (1, 2, 3, 4, 0, 6, 7, 5, 8),  # fácil
         (1, 2, 3, 5, 0, 6, 4, 7, 8),  # médio 1
@@ -166,22 +163,22 @@ def main():
     stats = []
 
     for i, inicio in enumerate(inicios):
-        print(Fore.MAGENTA + "\n" + "=" * 40)
-        print(Fore.MAGENTA + f"=========== TESTE {i} ===========")
-        print(Fore.MAGENTA + "=" * 40 + "\n")
+        print("\n" + "=" * 40)
+        print(f"=========== TESTE {i} ===========")
+        print("=" * 40 + "\n")
         print("Estado inicial:")
         aestrela.imprimir_estado(inicio)
 
         resultado = aestrela.a_estrela(inicio, 1000000)
         stats.append(resultado)
 
-        print(Fore.MAGENTA + "=" * 40)
-        print(Fore.MAGENTA + f"========= FIM TESTE {i} =========")
-        print(Fore.MAGENTA + "=" * 40 + "\n")
+        print("=" * 40)
+        print(f"========= FIM TESTE {i} =========")
+        print("=" * 40 + "\n")
 
-    print(Fore.CYAN + "\n" + "=" * 40)
-    print(Fore.CYAN + "=========== RESUMO FINAL ===========")
-    print(Fore.CYAN + "=" * 40 + "\n")
+    print("\n" + "=" * 40)
+    print("=========== RESUMO FINAL ===========")
+    print("=" * 40 + "\n")
 
     for i, stat in enumerate(stats):
         print("Resumo de desempenho -----------\n")
