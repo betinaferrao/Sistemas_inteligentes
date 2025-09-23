@@ -10,6 +10,7 @@ class CustoUniforme(Busca):
         estados_fechados = []
         pais = {inicio: None}
         distancias = {inicio: 0}
+        # Heap para facilitar a fila de prioridade
         heapq.heappush(estados_abertos, (0, inicio))
         cont_iteracoes = 0
         nodos_visitados = 0
@@ -35,20 +36,31 @@ class CustoUniforme(Busca):
                     "Caminho": caminho
                 }
 
+            # Ignora o estado se ele já esta na lista dos fechados
             if estado_atual in estados_fechados:
                 continue
-
+            
+            # Pegar os vizinhos
             for vizinho in self.definir_vizinhos(estado_atual):
+                # Pular se o vizinho já estiver fechado
                 if vizinho in estados_fechados:
                     continue
+
+                # Distância do estado anterior até o vizinho novo
                 dist_nova = dist + 1
+
+                # Pegar a distância do vizinho se tiver, se não definir como infinita
+                # float("inf") = infinito
+                # Se a distância for menor, atualiza distâncias e os pais
                 if dist_nova < distancias.get(vizinho, float("inf")):
                     distancias[vizinho] = dist_nova
                     pais[vizinho] = estado_atual
                     heapq.heappush(estados_abertos, (dist_nova, vizinho))
 
+            # Fecha o estado atual, atualiza as iterações
             estados_fechados.append(estado_atual)
             cont_iteracoes += 1
 
+        # Retorna erro se atingir o número máximo de iterações
         print("[ERRO] Sem solução no limite de iterações")
         return None
