@@ -6,9 +6,7 @@ Algoritmo que implementa custo uniforme, com base no algoritmo Dijkstra (dispon�
 
 Instruções de compilação (requisitos contem uma biblioteca para impressões coloridas):
 
-`pip install -r requirements.txt`
-
-`python3 custo_uniforme.py`
+`python3 main.py`
 
 Para exemplos diferentes, **modificar as tuplas na função main** e/ou a quantidade máxima de iterações ao chamar a função custo_uniforme.
 
