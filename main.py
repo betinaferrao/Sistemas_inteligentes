@@ -39,11 +39,9 @@ def main():
         if escolha == "2":
             heuristica = ae.heuristica_pecas_fora_do_lugar
         elif escolha == "3":
-            heuristica = ae.heuristica_distancia_manhathan
+            heuristica = ae.heuristica_distancia_manhatthan
         else:
-            def heuristica_nao_admissivel(estado):
-                return ae.heuristica_distancia_manhathan(estado) * 4
-            heuristica = heuristica_nao_admissivel
+            heuristica = ae.heuristica_nao_admissivel
         resultado = ae.a_estrela(inicio, heuristica, 100000)
     else:
         print("Opção inválida!")
